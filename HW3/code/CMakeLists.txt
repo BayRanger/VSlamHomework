@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(draw_trajectory)
+#fix cpp version
+set (CMAKE_CXX_STANDARD 11)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Release)
