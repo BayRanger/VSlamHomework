@@ -3,30 +3,50 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+#include <sstream>
+/*
+STL containers take an optional template parameter, 
+the allocator type. When using STL containers on 
+fixed-size vectorizable Eigen types, you need tell 
+the container to use an allocator that will always 
+allocate memory at 16-byte-aligned (or more) locations.
+ Fortunately, Eigen does provide such an allocator: Eigen::aligned_allocator.
 
+
+*/
 // need pangolin for plotting trajectory
 #include <pangolin/pangolin.h>
 
 using namespace std;
-
+using SE3Vec =vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>>;
 // path to trajectory file
-string trajectory_file = "./trajectory.txt";
+string trajectory_file = "../trajectory.txt";
 
 // function for plotting trajectory, don't edit this code
 // start point is red and end point is blue
 void DrawTrajectory(vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>>);
-
+//SE3Vec getTragectory()
 int main(int argc, char **argv) {
+    ifstream file(trajectory_file);
+    if(!file.good())
+    {
+        cout<<"[ERROR]; Invalid data file"<<endl;
+        return -1;
+    }
+    SE3Vec trajectory;
+    string str;
+    while (std::getline(file, str))
+    {
+        double _,tx,ty,tz,qx,qy,qz,qw;
+        istringstream iss(str);
+        iss>> _>>tx>>ty>>tz>>qx>>qy>>qz>>qw;
+        Sophus::SE3d p1(Eigen::Quaterniond(qx,qy,qz,qw),Eigen::Vector3d(tx,ty,tz));
+        trajectory.push_back(p1);
+        
+    }
 
-    vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>> poses;
 
-    /// implement pose reading code
-    // start your code here (5~10 lines)
-
-    // end your code here
-
-    // draw trajectory in pangolin
-    DrawTrajectory(poses);
+    DrawTrajectory(trajectory);
     return 0;
 }
 
@@ -68,6 +88,7 @@ void DrawTrajectory(vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>>
             glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
             glEnd();
         }
+        //pangolin::SaveFramebuffer("heee", );
         pangolin::FinishFrame();
         usleep(5000);   // sleep 5 ms
     }
