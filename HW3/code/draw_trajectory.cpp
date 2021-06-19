@@ -18,13 +18,15 @@ allocate memory at 16-byte-aligned (or more) locations.
 #include <pangolin/pangolin.h>
 
 using namespace std;
-using SE3Vec =vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>>;
+//using SE3Vec =vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>>;
+using SE3Vec =vector<Sophus::SE3d>;
+
 // path to trajectory file
 
 string trajectory_file = "../trajectory.txt";
 string gt_file = "../groundtruth.txt";
 string et_file="../estimated.txt";
-void DrawTrajectory(vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>>);
+void DrawTrajectory(SE3Vec);
 void DrawTrajectory(const SE3Vec &gt, const SE3Vec &esti);
 bool extractPoseVec(string filename,SE3Vec& v)
 {
@@ -41,18 +43,15 @@ bool extractPoseVec(string filename,SE3Vec& v)
         double _,tx,ty,tz,qx,qy,qz,qw;
         istringstream iss(str);
         iss>> _>>tx>>ty>>tz>>qx>>qy>>qz>>qw;
-        Sophus::SE3d p1(Eigen::Quaterniond(qx,qy,qz,qw),Eigen::Vector3d(tx,ty,tz));
-        v.push_back(p1);
+        //Sophus::SE3d p1(Eigen::Quaterniond(qx,qy,qz,qw),Eigen::Vector3d(tx,ty,tz));
+        v.emplace_back(Eigen::Quaterniond(qx,qy,qz,qw),Eigen::Vector3d(tx,ty,tz));
         
     }
-    cout<<"be true"<<endl;
+    //cout<<"be true"<<endl;
     return true;
 
 }
-// function for plotting trajectory, don't edit this code
-// start point is red and end point is blue
 
-//SE3Vec getTragectory()
 int main(int argc, char **argv) {
   
     SE3Vec trajectory,gt,et;
@@ -68,13 +67,22 @@ int main(int argc, char **argv) {
     {
         return -1;
     }
-    //DrawTrajectory(trajectory);
+
+    double rmse = 0;
+    for (size_t i = 0; i < et.size(); i++) {
+        Sophus::SE3d p1 = et[i], p2 = gt[i];
+        double error = (p2.inverse() * p1).log().norm();
+        rmse += error * error;
+    }
+    rmse = rmse / double(et.size());
+    rmse = sqrt(rmse);
+    cout << "RMSE = " << rmse << endl;
     DrawTrajectory(et,gt);
      return 0;
 }
 
 /*******************************************************************************************/
-void DrawTrajectory(vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>> poses) {
+void DrawTrajectory(SE3Vec poses) {
     if (poses.empty()) {
         cerr << "Trajectory is empty!" << endl;
         return;
