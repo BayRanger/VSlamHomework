@@ -12,9 +12,9 @@ using namespace std;
 using namespace Eigen;
 
 // 文件路径，如果不对，请调整
-string left_file = "./left.png";
-string right_file = "./right.png";
-string disparity_file = "./disparity.png";
+string left_file = "../left.png";
+string right_file = "../right.png";
+string disparity_file = "../disparity.png";
 
 // 在panglin中画图，已写好，无需调整
 void showPointCloud(const vector<Vector4d, Eigen::aligned_allocator<Vector4d>> &pointcloud);
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     // 内参
     double fx = 718.856, fy = 718.856, cx = 607.1928, cy = 185.2157;
     // 间距
-    double d = 0.573;
+    double b = 0.573;
 
     // 读取图像
     cv::Mat left = cv::imread(left_file, 0);
@@ -39,11 +39,18 @@ int main(int argc, char **argv) {
     for (int v = 0; v < left.rows; v++)
         for (int u = 0; u < left.cols; u++) {
 
-            Vector4d point(0, 0, 0, left.at<uchar>(v, u) / 255.0); // 前三维为xyz,第四维为颜色
-
+            double d = disparity.at<uchar>(v,u);
+            double x = (u-cx)/fx;
+            double y = (v-cy)/fy;
+            double z = fx*b/d;
+            //Vector4d point(x,y,d, left.at<uchar>(v, u) / 255.0); // 前三维为xyz,第四维为颜色
+            //pointcloud.push_back(point);
+           pointcloud.emplace_back(x*z,y*z,z,left.at<uchar>(v, u) / 255.0); 
             // start your code here (~6 lines)
             // 根据双目模型计算 point 的位置
             // end your code here
+
+
         }
 
     // 画出点云
