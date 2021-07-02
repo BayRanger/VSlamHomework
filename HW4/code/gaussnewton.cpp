@@ -9,9 +9,14 @@
 using namespace std;
 using namespace Eigen;
 
+double fun(double a, double b, double c, double x)
+{
+    return exp(a * x * x + b * x + c);
+}
+
 int main(int argc, char **argv) {
-    double ar = 1.0, br = 2.0, cr = 1.0;         // 真实参数值
-    double ae = 2.0, be = -1.0, ce = 5.0;        // 估计参数值
+    double ar = 10.0, br = 20.0, cr = 10.0;         // 真实参数值
+    double ae = 20.0, be = -10.0, ce = 50.0;        // 估计参数值
     int N = 100;                                 // 数据点
     double w_sigma = 1.0;                        // 噪声Sigma值
     cv::RNG rng;                                 // OpenCV随机数产生器
@@ -36,12 +41,12 @@ int main(int argc, char **argv) {
         for (int i = 0; i < N; i++) {
             double xi = x_data[i], yi = y_data[i];  // 第i个数据点
             // start your code here
-            double error = 0;   // 第i个数据点的计算误差
-            error = 0; // 填写计算error的表达式
+            double error = fun(ae,be,ce,xi) - yi;   // 第i个数据点的计算误差
+            //error = 0; // 填写计算error的表达式
             Vector3d J; // 雅可比矩阵
-            J[0] = 0;  // de/da
-            J[1] = 0;  // de/db
-            J[2] = 0;  // de/dc
+            J[0] =  fun(ae,be,ce,xi)*xi*xi;  // de/da
+            J[1] = fun(ae,be,ce,xi)*xi;  // de/db
+            J[2] = fun(ae,be,ce,xi);  // de/dc
 
             H += J * J.transpose(); // GN近似的H
             b += -error * J;
@@ -53,6 +58,7 @@ int main(int argc, char **argv) {
         // 求解线性方程 Hx=b，建议用ldlt
  	// start your code here
         Vector3d dx;
+        dx =H.inverse()*b;
 	// end your code here
 
         if (isnan(dx[0])) {
