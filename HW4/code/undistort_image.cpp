@@ -21,20 +21,20 @@ int main(int argc, char **argv) {
     cv::Mat image = cv::imread(image_file,0);   // 图像是灰度图，CV_8UC1
     int rows = image.rows, cols = image.cols;
     cv::Mat image_undistort = cv::Mat(rows, cols, CV_8UC1);   // 去畸变以后的图
-    double center_x = rows/2;
-    double center_y = cols/2;
+ 
 
     // 计算去畸变后图像的内容
     for (int v = 0; v < rows; v++)
         for (int u = 0; u < cols; u++) {
-            double x = (u-center_x)/fx;
-            double y = (v- center_y)/fy;
+            double x = (u-cx)/fx;
+            double y = (v- cy)/fy;
             double r = sqrt(x*x+y*y);
             double x_corr = x*(1+k1*r*r + k2*r*r*r*r) + 2*p1*x*y + p2*(r*r+2*x*x);
             double y_corr = y*(1+k1*r*r + k2*r*r*r*r) + p1*(r*r+2*y*y) + 2*p2*(x*y);
+            std::cout<<x<<"->"<<x_corr<<", "<<y<<"->"<<y_corr<<std::endl;
  
-            int u_distorted =fx*x_corr+ center_x;
-            int v_distorted = fy*y_corr+ center_y;
+            int u_distorted =fx*x_corr+ cx;
+            int v_distorted = fy*y_corr+ cy;
  
             if (u_distorted >= 0 && v_distorted >= 0 && u_distorted < cols && v_distorted < rows) {
                 image_undistort.at<uchar>(v, u) = image.at<uchar>((int) v_distorted, (int) u_distorted);
