@@ -171,7 +171,7 @@ void computeORBDesc(const cv::Mat &image, vector<cv::KeyPoint> &keypoints, vecto
             d[i] = (image.at<uchar>(up_r,vp_r)>image.at<uchar>(uq_r,vq_r))?0:1;  // if kp goes outside, set d.clear()
 	    // END YOUR CODE HERE
         }
-        std::cout<<"dsize "<<d.size()<<std::endl;
+        //std::cout<<"dsize "<<d.size()<<std::endl;
         desc.push_back(d);
     }
 
@@ -198,7 +198,7 @@ int HammingDist(const DescType& desc1, const DescType& desc2)
 }
 // brute-force matching
 void bfMatch(const vector<DescType> &desc1, const vector<DescType> &desc2, vector<cv::DMatch> &matches) {
-    int d_max = 50;
+    int d_max = 40;
 
     // START YOUR CODE HERE (~12 lines)
     // find matches between desc1 and desc2. 
@@ -217,7 +217,6 @@ void bfMatch(const vector<DescType> &desc1, const vector<DescType> &desc2, vecto
                     continue;
                 }
             int dist =HammingDist(desc1[i],desc2[j]);
-            cout<<"hamming distance "<<dist<<endl;
             if (dist<best_dist)
                 {
                     best_id = j;
@@ -225,7 +224,6 @@ void bfMatch(const vector<DescType> &desc1, const vector<DescType> &desc2, vecto
                 }            
         }
         if(best_dist<d_max) {
-            cout<<"add match"<<endl;
             matches.emplace_back(i,best_id,best_dist);
         }
     }
