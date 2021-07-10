@@ -29,22 +29,30 @@ int main(int argc, char **argv) {
 
     // SVD and fix sigular values
     // START YOUR CODE HERE
+    JacobiSVD<MatrixXd> svd(E, ComputeThinU | ComputeThinV);
+    double sigma = svd.singularValues()(0) + svd.singularValues()(1);
+    sigma = sigma/2.0;
+    DiagonalMatrix<double, 3> Sigma(sigma, sigma, 0);
+    auto U = svd.matrixU();
+    auto V = svd.matrixV();
+    Matrix3d Rz  = AngleAxisd(0.5*M_PI, Vector3d::UnitZ()).matrix();
+    Matrix3d Rminusz = AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix();
 
     // END YOUR CODE HERE
 
     // set t1, t2, R1, R2 
     // START YOUR CODE HERE
-    Matrix3d t_wedge1;
-    Matrix3d t_wedge2;
+    Matrix3d t_wedge1 = U*Rz*Sigma*U.transpose();
+    Matrix3d t_wedge2 = U*Rminusz*Sigma*U.transpose();
 
-    Matrix3d R1;
-    Matrix3d R2;
+    Matrix3d R1 = U*Rz.transpose()*V.transpose();
+    Matrix3d R2 = U*Rminusz.transpose()*V.transpose();
     // END YOUR CODE HERE
 
     cout << "R1 = " << R1 << endl;
     cout << "R2 = " << R2 << endl;
-    cout << "t1 = " << Sophus::SO3d::vee(t_wedge1) << endl;
-    cout << "t2 = " << Sophus::SO3d::vee(t_wedge2) << endl;
+    cout << "t1 = " << t_wedge1<<"\n-->"<<Sophus::SO3d::vee(t_wedge1).transpose() << endl;
+    cout << "t2 = " << t_wedge2<<"\n-->"<< Sophus::SO3d::vee(t_wedge2).transpose() << endl;
 
     // check t^R=E up to scale
     Matrix3d tR = t_wedge1 * R1;
