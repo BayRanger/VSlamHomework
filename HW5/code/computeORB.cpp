@@ -125,9 +125,9 @@ void computeAngle(const cv::Mat &image, vector<cv::KeyPoint> &keypoints) {
     {
         int pos_x = half_patch_size*sin(i*PI/(2*half_patch_size));
         int pos_y = half_patch_size*cos(i*PI/(2*half_patch_size));
-        m10+=(pos_x)*image.at<uchar>(kp.pt.y+pos_x,kp.pt.x+pos_y);
-        m00+=image.at<uchar>(kp.pt.x+pos_x,kp.pt.y+pos_y);
-        m01+=(pos_y)*image.at<uchar>(kp.pt.y+pos_x,kp.pt.x+pos_y);
+        m10+=(pos_y)*image.at<uchar>(kp.pt.y+pos_y,kp.pt.x+pos_x);
+        m00+=image.at<uchar>(kp.pt.y+pos_y,kp.pt.x+pos_x);
+        m01+=(pos_x)*image.at<uchar>(kp.pt.y+pos_y,kp.pt.x+pos_x);
     }
     float cx = m10/m00;
     float cy = m01/m00;
@@ -153,10 +153,10 @@ void computeORBDesc(const cv::Mat &image, vector<cv::KeyPoint> &keypoints, vecto
             int v_p = ORB_pattern[i*4+1];
             int u_q = ORB_pattern[i*4+2];
             int v_q = ORB_pattern[i*4+3];
-            int up_r = cos(kp.angle)*u_p - sin(kp.angle)*v_p + kp.pt.x;
-            int vp_r = sin(kp.angle)*u_p + cos(kp.angle)* v_p +kp.pt.y; 
-            int uq_r = cos(kp.angle)*u_q - sin(kp.angle)*v_q + kp.pt.x;
-            int vq_r = sin(kp.angle)*u_q + cos(kp.angle)* v_q + kp.pt.y; 
+            int up_r = cos(kp.angle)*u_p - sin(kp.angle)*v_p + kp.pt.y;
+            int vp_r = sin(kp.angle)*u_p + cos(kp.angle)* v_p +kp.pt.x; 
+            int uq_r = cos(kp.angle)*u_q - sin(kp.angle)*v_q + kp.pt.y;
+            int vq_r = sin(kp.angle)*u_q + cos(kp.angle)* v_q + kp.pt.x; 
             if(up_r<0||vp_r<0||uq_r<0||vq_r<0||
             up_r>=image.rows||uq_r>=image.rows||vp_r>=image.cols||vq_r>=image.cols)
             {
