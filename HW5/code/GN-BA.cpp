@@ -12,7 +12,7 @@ using namespace Eigen;
 #include <iostream>
 #include <iomanip>
 
-#include "sophus/se3.h"
+#include "sophus/se3.hpp"
 
 using namespace std;
 
@@ -20,8 +20,8 @@ typedef vector<Vector3d, Eigen::aligned_allocator<Vector3d>> VecVector3d;
 typedef vector<Vector2d, Eigen::aligned_allocator<Vector3d>> VecVector2d;
 typedef Matrix<double, 6, 1> Vector6d;
 
-string p3d_file = "./p3d.txt";
-string p2d_file = "./p2d.txt";
+string p3d_file = "../p3d.txt";
+string p2d_file = "../p2d.txt";
 
 int main(int argc, char **argv) {
 
@@ -33,7 +33,31 @@ int main(int argc, char **argv) {
 
     // load points in to p3d and p2d 
     // START YOUR CODE HERE
+    ifstream p3dfile;
+    p3dfile.open(p3d_file);
+    std::string line;
+    while(getline(p3dfile,line)) {
+        cout<<line<<endl;
+        istringstream iss(line);
+        Vector3d point3d;
+        double tmp_a,tmp_b,tmp_c;
+        iss>>tmp_a>>tmp_b>>tmp_c;
+        p3d.emplace_back(tmp_a,tmp_b,tmp_c);
+    }
+    p3dfile.close();
 
+    ifstream p2dfile;
+    p2dfile.open(p2d_file);
+    //std::string line;
+    while(getline(p2dfile,line)) {
+        //cout<<line<<endl;
+        istringstream iss(line);
+        Vector2d point2d;
+        double tmp_a,tmp_b;
+        iss>>tmp_a>>tmp_b;
+        p2d.emplace_back(tmp_a,tmp_b);
+    }
+    p2dfile.close();
     // END YOUR CODE HERE
     assert(p3d.size() == p2d.size());
 
@@ -42,18 +66,25 @@ int main(int argc, char **argv) {
     int nPoints = p3d.size();
     cout << "points: " << nPoints << endl;
 
-    Sophus::SE3 T_esti; // estimated pose
+    Sophus::SE3d T_esti; // estimated pose
 
     for (int iter = 0; iter < iterations; iter++) {
 
         Matrix<double, 6, 6> H = Matrix<double, 6, 6>::Zero();
         Vector6d b = Vector6d::Zero();
+        T_esti = Sophus::SE3d::exp(b);
 
         cost = 0;
         // compute cost
         for (int i = 0; i < nPoints; i++) {
             // compute cost for p3d[I] and p2d[I]
             // START YOUR CODE HERE 
+            Eigen::Vector4d P_homo;
+            //P_homo.block<3,1>(0,0) = VecVector3d[i];
+
+            //Vector3d reproj_vec = K*T_esti.matrix()*VecVector3d[i];
+            //Vector2d bias = p2d[i]-
+
 
 	    // END YOUR CODE HERE
 
@@ -64,7 +95,7 @@ int main(int argc, char **argv) {
 	    // END YOUR CODE HERE
 
             H += J.transpose() * J;
-            b += -J.transpose() * e;
+            //b += -J.transpose() * e;
         }
 
 	// solve dx 
