@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
     p3dfile.open(p3d_file);
     std::string line;
     while(getline(p3dfile,line)) {
-        std::cout<<line<<endl;
+        //std::cout<<line<<endl;
         istringstream iss(line);
         Vector3d point3d;
         double tmp_a,tmp_b,tmp_c;
@@ -65,32 +65,33 @@ int main(int argc, char **argv) {
     int iterations = 100;
     double cost = 0, lastCost = 0;
     int nPoints = p3d.size();
-    std::cout << "points: " << nPoints << endl;
+    std::cout << "points number: " << nPoints << endl;
 
     Sophus::SE3d T_esti; // estimated pose
     Vector6d t_esti=Vector6d::Zero();
+    T_esti = Sophus::SE3d::exp(t_esti);
 
     for (int iter = 0; iter < iterations; iter++) {
 
         Matrix<double, 6, 6> H = Matrix<double, 6, 6>::Zero();
         Vector6d b = Vector6d::Zero();
-        T_esti = Sophus::SE3d::exp(t_esti);
         cost = 0;
         // compute cost
         for (int i = 0; i < nPoints; i++) {
             // compute cost for p3d[I] and p2d[I]
             // Homogenous representation 
-            Eigen::Vector4d P_homo;
-            P_homo.block<3,1>(0,0) = p3d[i];
-            P_homo(3,0) = 1;
-            //back to camera coordinate
-            Vector4d Pt = T_esti.matrix()*P_homo;
-            Vector3d P_norm = Pt.block<3,1>(0,0)/Pt(3,0); 
-            P_norm/=P_norm(2,0);
+            // Eigen::Vector4d P_homo;
+            // P_homo.block<3,1>(0,0) = p3d[i];
+            // P_homo(3,0) = 1;
+            // //back to camera coordinate
+            // Vector4d Pt = T_esti.matrix()*P_homo;
+            // Vector3d P_norm = Pt.block<3,1>(0,0)/Pt(3,0); 
+            Vector3d P_norm = T_esti*p3d[i];
+            //P_norm/=P_norm(2,0);
             Vector3d reproj_vec3d = K*P_norm;
             Vector2d reproj_vec = reproj_vec3d.block<2,1>(0,0)/reproj_vec3d(2,0);
-            Vector2d bias = reproj_vec - p2d[i];
-            cost +=sqrt(bias.transpose()*bias);
+            Vector2d err =p2d[i]- reproj_vec;
+            cost +=sqrt(err.transpose()*err);
 
 
 	    // compute jacobian
@@ -100,10 +101,10 @@ int main(int argc, char **argv) {
             Matrix<double, 2, 6> J;
             J<<fx/Z, 0, -fx*X/(Z*Z), - fx*X*Y/(Z*Z),fx+fx*X*X/(Z*Z),-fx*Y/Z,
             0,fy/Z,-fy*Y/(Z*Z),-fy-(fy*Y*Y)/(Z*Z), fy*X*Y/(Z*Z),fy*X/Z;
-            J*=-1;
+            J*=-1;//如果观测值减去预测值,就需要加负号
 
             H += J.transpose() * J;
-            b += -J.transpose() * bias;
+            b += -J.transpose() * err;
         }
 
 	// solve dx 
@@ -127,7 +128,9 @@ int main(int argc, char **argv) {
 
         // update your estimation
         // START YOUR CODE HERE
-        t_esti+=dx;
+        //t_esti+=dx;
+        T_esti = Sophus::SE3d::exp(dx) * T_esti;
+
 
         // END YOUR CODE HERE
         
