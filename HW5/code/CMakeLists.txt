@@ -42,3 +42,9 @@ ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${Sophus_INCLUDE_DIRS}
 ${OpenCV_LIBS}  )
+
+
+add_executable(GN-ICP GN-ICP.cpp)
+target_link_libraries(GN-BA
+${EIGEN3_LIBS}
+${Sophus_INCLUDE_DIRS}  )
