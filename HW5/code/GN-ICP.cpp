@@ -10,21 +10,24 @@ using namespace std;
 
 typedef vector<Sophus::SE3d> SE3dVec; 
 
-void fileToSE3dvec(string filename, SE3dVec& tgt_pts, SE3dVec& src_pts)
+void fileToSE3dvec(string filename, SE3dVec& src_pts, SE3dVec& gt_pts)
 {
     ifstream file;
     file.open(filename);
     std::string line;
     while(getline(file,line)) {
-        //std::cout<<line<<endl;
         istringstream iss(line);
-        double linedata[15];
-        //double tmp_a,tmp_b,tmp_c;
-        //iss>>*linedata;
-        for (int i =0;i<15;i++) {
+        double linedata[16];
+        for (int i =0;i<16;i++) {
             iss>>linedata[i];
         }
-        cout<<cout.precision(15)<<linedata[0]<<"   "<<linedata[1]<<endl;
+        Eigen::Quaterniond  src_quat(linedata[7],linedata[4],linedata[5],linedata[6]);
+        Eigen::Vector3d src_tran(linedata[1],linedata[2],linedata[3]);
+        src_pts.emplace_back(src_quat,src_tran);
+        
+        Eigen::Quaterniond  gt_quat(linedata[15],linedata[12],linedata[13],linedata[14]);
+        Eigen::Vector3d gt_tran(linedata[9],linedata[10],linedata[11]);
+        gt_pts.emplace_back(gt_quat,gt_tran);
 
     }
 
@@ -34,10 +37,11 @@ void fileToSE3dvec(string filename, SE3dVec& tgt_pts, SE3dVec& src_pts)
 
 int main()
 {
-    SE3dVec data1,data2;
+    SE3dVec gt_vec,src_vec;
     string filename="../compare.txt";
-    fileToSE3dvec(filename,data1,data2 );
-
+    fileToSE3dvec(filename,src_vec,gt_vec);
+    assert(gt_vec.size() == src_vec.size());
+    cout<<"data size "<<gt_vec.size()<<endl;
 }
 
 /**
