@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
             double r = sqrt(x*x+y*y);
             double x_corr = x*(1+k1*r*r + k2*r*r*r*r) + 2*p1*x*y + p2*(r*r+2*x*x);
             double y_corr = y*(1+k1*r*r + k2*r*r*r*r) + p1*(r*r+2*y*y) + 2*p2*(x*y);
-            std::cout<<x<<"->"<<x_corr<<", "<<y<<"->"<<y_corr<<std::endl;
+            //std::cout<<x<<"->"<<x_corr<<", "<<y<<"->"<<y_corr<<std::endl;
  
             int u_distorted =fx*x_corr+ cx;
             int v_distorted = fy*y_corr+ cy;

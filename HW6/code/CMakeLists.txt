@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
-project(vslam_hw4)
+project(vslam_hw5)
 #fix cpp version
 set (CMAKE_CXX_STANDARD 11)
 
 IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Release)
+  SET(CMAKE_BUILD_TYPE Debug)
 ENDIF()
 MESSAGE("Build type: " ${CMAKE_BUILD_TYPE})
 find_package(Eigen3 3.1.0 REQUIRED)
@@ -20,25 +20,31 @@ ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
 
 )
-add_executable(undistortImage undistort_image.cpp)
+add_executable(computeORB computeORB.cpp)
 
-target_link_libraries(undistortImage
+target_link_libraries(computeORB
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${Sophus_INCLUDE_DIRS}
 ${OpenCV_LIBS}  )
 
-add_executable(disparity disparity.cpp)
+add_executable(E2Rt E2Rt.cpp)
 
-target_link_libraries(disparity
+target_link_libraries(E2Rt
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${Sophus_INCLUDE_DIRS}
 ${OpenCV_LIBS}  )
 
-add_executable(gaussnewton gaussnewton.cpp)
-target_link_libraries(gaussnewton
+add_executable(GN-BA GN-BA.cpp)
+target_link_libraries(GN-BA
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${Sophus_INCLUDE_DIRS}
 ${OpenCV_LIBS}  )
+
+
+add_executable(GN-ICP GN-ICP.cpp)
+target_link_libraries(GN-BA
+${EIGEN3_LIBS}
+${Sophus_INCLUDE_DIRS}  )
